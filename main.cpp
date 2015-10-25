@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iterator>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -13,9 +12,9 @@ using namespace Eigen;
 
 int main(void)
 {
-  static const int R = 1024;
-  static const int N = R*R;
-  static const int M = 5;
+  static const int R = 576;
+  static const int N = R*(R+1) / 2;
+  static const int M = 63;
   static const float nsigma = 3.5f;
 
   MatrixXf data = MatrixXf::Random(M, N);
