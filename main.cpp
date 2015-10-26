@@ -1,7 +1,6 @@
-#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <cassert>
+#include <stdio.h>
 
 #include <Eigen/Dense>
 
@@ -14,7 +13,7 @@ int main(void)
 {
   static const int R = 1536;
   static const int N = R*R;
-  static const int M = 32;
+  static const int M = 6;
   static const int HALF_M = M/2;
   static const float nsigma = 2.5f;
 
@@ -39,7 +38,7 @@ int main(void)
       centroid(i) = row[HALF_M];
     }
   }
-  // nth_element guarantees x_0,...,x_n-1 < x_n
+  // nth_element guarantees x_0,...,x_{n-1} < x_n
   else
   {
     for (int i = 0; i < N; i++)
@@ -79,9 +78,10 @@ int main(void)
   result = data.colwise().sum().array() / mask.colwise().sum().array();
 
   t = GetRealTime() - t;
+  size_t bytes = data.size()*sizeof(float);
   printf("time:        %0.2f s\n", t);
-  printf("size:        %0.2f MB\n", data.size()*sizeof(float)*1e-6f);
-  printf("throughput:  %0.2f MB/s\n", data.size()*sizeof(float)/(1e6f*t));
+  printf("size:        %0.2f MB\n", bytes*1e-6f);
+  printf("throughput:  %0.2f MB/s\n", bytes/(1e6f*t));
 
   return 0;
 }
