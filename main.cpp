@@ -12,10 +12,11 @@ using namespace Eigen;
 
 int main(void)
 {
-  static const int R = 576;
-  static const int N = R*(R+1) / 2;
-  static const int M = 63;
-  static const float nsigma = 3.5f;
+  static const int R = 1536;
+  static const int N = R*R;
+  static const int M = 32;
+  static const int HALF_M = M/2;
+  static const float nsigma = 2.5f;
 
   MatrixXf data = MatrixXf::Random(M, N);
   MatrixXf mask = MatrixXf::Zero(M, N);
@@ -28,12 +29,27 @@ int main(void)
 
   double t = GetRealTime();
 
-  // computes the median
-  for (int i = 0; i < N; i++)
+  // computes the exact median
+  if (M&1)
   {
-    vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
-    nth_element(row.begin(), row.begin()+(M>>1), row.end());
-    centroid(i) = row[M>>1];
+    for (int i = 0; i < N; i++)
+    {
+      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
+      nth_element(row.begin(), row.begin()+HALF_M, row.end());
+      centroid(i) = row[HALF_M];
+    }
+  }
+  // nth_element guarantees x_0,...,x_n-1 < x_n
+  else
+  {
+    for (int i = 0; i < N; i++)
+    {
+      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
+      nth_element(row.begin(), row.begin()+HALF_M, row.end());
+      centroid(i) = row[HALF_M];
+      centroid(i) += *max_element(row.begin(), row.begin()+HALF_M);
+      centroid(i) *= 0.5f;
+    }
   }
 
   // compute the mean
@@ -59,11 +75,13 @@ int main(void)
   // apply clip mask to data
   data.array() *= mask.array();
 
-  // compute mean such that we ignore clipped data, this is our final data
+  // compute mean such that we ignore clipped data, this is our final result
   result = data.colwise().sum().array() / mask.colwise().sum().array();
 
   t = GetRealTime() - t;
-  cout << "time = " << t
-       << "\tthroughput = " << data.size() * sizeof(float) / (1e6f * t) << " MB/s"
-       << endl;
+  printf("time:        %0.2f s\n", t);
+  printf("size:        %0.2f MB\n", data.size()*sizeof(float)*1e-6f);
+  printf("throughput:  %0.2f MB/s\n", data.size()*sizeof(float)/(1e6f*t));
+
+  return 0;
 }
