@@ -54,9 +54,9 @@ int main(void)
   // compute the mean
   mean = data.colwise().mean();
 
-  // compute std (x) = sqrt ( 1/(N-1) SUM_i (x(i) - mean(x))^2 )
+  // compute std (x) = sqrt ( 1/N SUM_i (x(i) - mean(x))^2 )
   std = (((data.rowwise() - mean.transpose()).array().square()).colwise().sum() *
-         (1.0f / (M - 1.0f)))
+         (1.0f / M))
             .array()
             .sqrt();
 
