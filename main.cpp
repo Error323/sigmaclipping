@@ -13,7 +13,7 @@ int main(void)
 {
   static const int R = 1536;
   static const int N = R*R;
-  static const int M = 6;
+  static const int M = 32;
   static const int HALF_M = M/2;
   static const float nsigma = 2.5f;
 
@@ -26,11 +26,13 @@ int main(void)
   VectorXf minval = VectorXf::Zero(N);
   VectorXf maxval = VectorXf::Zero(N);
 
+  printf("begin computation\n");
   double t = GetRealTime();
 
   // computes the exact median
   if (M&1)
   {
+#pragma omp parallel for simd
     for (int i = 0; i < N; i++)
     {
       vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
@@ -41,6 +43,7 @@ int main(void)
   // nth_element guarantees x_0,...,x_{n-1} < x_n
   else
   {
+#pragma omp parallel for simd
     for (int i = 0; i < N; i++)
     {
       vector<float> row(data.data()+i*M, data.data()+(i+1)*M);

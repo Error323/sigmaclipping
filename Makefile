@@ -1,5 +1,5 @@
-CC=clang++-3.6
-CFLAGS= -O3 -Wall -Wextra -pedantic -DNDEBUG -march=native -I/usr/local/include/eigen3
+CC=g++
+CFLAGS= -O3 -Wall -Wextra -pedantic -fopenmp -DEIGEN_DONT_PARALLELIZE -DNDEBUG -mavx -I/usr/local/include/eigen3
 
 all:
 	$(CC) -o sigmaclip $(CFLAGS) main.cpp
