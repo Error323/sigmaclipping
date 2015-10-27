@@ -1,6 +1,6 @@
 #include <vector>
 #include <algorithm>
-#include <stdio.h>
+#include <iostream>
 
 #include <Eigen/Dense>
 
@@ -26,13 +26,13 @@ int main(void)
   VectorXf minval = VectorXf::Zero(N);
   VectorXf maxval = VectorXf::Zero(N);
 
-  printf("begin computation\n");
+  cout << "computing..." << flush;
   double t = GetRealTime();
 
   // computes the exact median
   if (M&1)
   {
-#pragma omp parallel for simd
+#pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
       vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
@@ -43,7 +43,7 @@ int main(void)
   // nth_element guarantees x_0,...,x_{n-1} < x_n
   else
   {
-#pragma omp parallel for simd
+#pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
       vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
@@ -81,10 +81,12 @@ int main(void)
   result = data.colwise().sum().array() / mask.colwise().sum().array();
 
   t = GetRealTime() - t;
+  cout << "[done]" << endl << endl;
+
   size_t bytes = data.size()*sizeof(float);
-  printf("time:        %0.2f s\n", t);
-  printf("size:        %0.2f MB\n", bytes*1e-6f);
-  printf("throughput:  %0.2f MB/s\n", bytes/(1e6f*t));
+  cout << "time:       " << t << " s\n";
+  cout << "size:       " << bytes*1e-6f << " MB\n";
+  cout << "throughput: " << bytes/(1e6f*t) << " MB/s\n";
 
   return 0;
 }
