@@ -85,9 +85,9 @@ int main(void)
 
   size_t bytes = data.size()*sizeof(float);
   cout << "data: " << M << "x" << R << "x" << R << endl;
-  cout << "size: " << bytes*1e-6f << " MB\n";
-  cout << "time: " << t << " s\n";
-  cout << "rate: " << bytes/(1e6f*t) << " MB/s\n";
+  cout << "size: " << bytes*1e-6f << " MB" << endl;
+  cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
+  cout << "time: " << t << " s" << endl;
 
   return 0;
 }
