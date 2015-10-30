@@ -87,7 +87,7 @@ int main(void)
   t = GetRealTime() - t;
   cout << "[done]" << endl << endl;
 
-  size_t bytes = data.size()*sizeof(float);
+  size_t bytes = raw.size()*sizeof(raw(0,0));
   cout << "data: " << M << "x" << N << endl;
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
