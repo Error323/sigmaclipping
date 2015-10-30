@@ -11,15 +11,17 @@ using namespace Eigen;
 
 int main(void)
 {
-  static const int R = 1536;
-  static const int N = R*R;
-  static const int M = 32;
+  static const int R = 288;
+  static const int N = R*(R+1)/2;
+  static const int M = 63;
   static const int HALF_M = M/2;
-  static const float nsigma = 2.5f;
+  static const float nsigma = 2.0f;
 
-  MatrixXf data = MatrixXf::Random(M, N);
+  MatrixXcf raw = MatrixXcf::Random(M, N);
+  VectorXcf result = VectorXcf::Zero(N);
+  MatrixXf tmp = MatrixXf::Zero(M, N);
+  MatrixXf data = MatrixXf::Zero(M, N);
   MatrixXf mask = MatrixXf::Zero(M, N);
-  MatrixXf result = MatrixXf::Zero(1, N);
   VectorXf std = VectorXf::Zero(N);
   VectorXf centroid = VectorXf::Zero(N);
   VectorXf mean = VectorXf::Zero(N);
@@ -28,6 +30,8 @@ int main(void)
 
   cout << "computing..." << flush;
   double t = GetRealTime();
+  data = raw.array().abs();
+  tmp = data;
 
   // computes the exact median
   if (M&1)
@@ -35,7 +39,7 @@ int main(void)
 #pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
-      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
+      vector<float> row(tmp.data()+i*M, tmp.data()+(i+1)*M);
       nth_element(row.begin(), row.begin()+HALF_M, row.end());
       centroid(i) = row[HALF_M];
     }
@@ -46,7 +50,7 @@ int main(void)
 #pragma omp parallel for
     for (int i = 0; i < N; i++)
     {
-      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
+      vector<float> row(tmp.data()+i*M, tmp.data()+(i+1)*M);
       nth_element(row.begin(), row.begin()+HALF_M, row.end());
       centroid(i) = row[HALF_M];
       centroid(i) += *max_element(row.begin(), row.begin()+HALF_M);
@@ -75,16 +79,16 @@ int main(void)
   }
 
   // apply clip mask to data
-  data.array() *= mask.array();
+  raw.array() *= mask.array();
 
   // compute mean such that we ignore clipped data, this is our final result
-  result = data.colwise().sum().array() / mask.colwise().sum().array();
+  result = raw.colwise().sum().array() / mask.colwise().sum().array();
 
   t = GetRealTime() - t;
   cout << "[done]" << endl << endl;
 
   size_t bytes = data.size()*sizeof(float);
-  cout << "data: " << M << "x" << R << "x" << R << endl;
+  cout << "data: " << M << "x" << N << endl;
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
   cout << "time: " << t << " s" << endl;
