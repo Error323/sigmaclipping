@@ -11,9 +11,10 @@ using namespace Eigen;
 
 int main(void)
 {
-  static const int R = 1536;
-  static const int N = R*R;
-  static const int M = 32;
+  cout << "Eigen v" << EIGEN_WORLD_VERSION << "." << EIGEN_MAJOR_VERSION << "." << EIGEN_MINOR_VERSION << endl;
+  static const int R = 288;
+  static const int N = R*(R+1)/2;
+  static const int M = 63;
   static const int HALF_M = M/2;
   static const float nsigma = 2.5f;
 
@@ -84,7 +85,7 @@ int main(void)
   cout << "[done]" << endl << endl;
 
   size_t bytes = data.size()*sizeof(float);
-  cout << "data: " << M << "x" << R << "x" << R << endl;
+  cout << "data: " << M << "x" << N << endl;
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
   cout << "time: " << t << " s" << endl;

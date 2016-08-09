@@ -1,5 +1,5 @@
 CC=g++
-INCLUDES=-I/usr/local/include/eigen3
+INCLUDES=-I/net/home/fhuizing/soft/release/include/eigen3
 CFLAGS=-O3 -Wall -Wextra -pedantic -DNDEBUG -mavx
 LIBS=-fopenmp -DEIGEN_DONT_PARALLELIZE 
 TARGET=sigmaclipping
