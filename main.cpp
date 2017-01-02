@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "timer.h"
+#include "sigmaclip.h"
 
 using namespace std;
 using namespace Eigen;
@@ -12,6 +13,30 @@ using namespace Eigen;
 int main(void)
 {
   cout << "Eigen v" << EIGEN_WORLD_VERSION << "." << EIGEN_MAJOR_VERSION << "." << EIGEN_MINOR_VERSION << endl;
+
+  /*
+  int a[] = {1, 4, 2, 6, 9, 5};
+  int b[] = {0, 1, 1, 0, 1, 0};
+
+  auto p = StablePartitionPosition(begin(a), end(a), [&](auto i) {
+    return *(begin(b) + (i - begin(a)));
+  });
+
+  for (auto f = begin(a), l = p; f != l; ++f) cout << *f << " ";
+  cout << "^ ";
+  for (auto f = p, l = end(a); f != l; ++f) cout << *f << " ";
+  cout << endl;
+  */
+
+  VectorXf data(7); data << 7,1,0,2,8,3,1;
+  VectorXf mask(7); mask << 1,1,1,1,1,1,1;
+
+  cout << data.transpose() << endl;
+  cout << SigmaClip(data, mask) << endl;
+  cout << mask.transpose() << endl;
+  cout << data.transpose() << endl;
+
+  /*
   static const int R = 288;
   static const int N = R*(R+1)/2;
   static const int M = 63;
@@ -89,6 +114,7 @@ int main(void)
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
   cout << "time: " << t << " s" << endl;
+  */
 
   return 0;
 }
