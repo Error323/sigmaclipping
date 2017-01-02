@@ -1,6 +1,6 @@
 CC=g++
 INCLUDES=-I/usr/local/include/eigen3
-CFLAGS=-O3 -Wall -Wextra -pedantic -DNDEBUG -mavx
+CFLAGS=-O3 -Wall -Wextra -pedantic -DNDEBUG -march=native -mtune=native
 LIBS=-fopenmp -DEIGEN_DONT_PARALLELIZE 
 TARGET=sigmaclipping
 
