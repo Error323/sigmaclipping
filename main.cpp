@@ -25,12 +25,12 @@ int main(void)
 
   cout << "computing..." << flush;
   double t = GetRealTime();
-  MatrixXf abs = data.array().abs();
-  VectorXf channels = abs.rowwise().mean();
+  VectorXf channels = data.rowwise().mean().array().abs();
   VectorXf channel_mask = VectorXf::Ones(M);
 
   int iters = SigmaClip(channels, channel_mask, nsigma);
 
+  // mask rows that contribute
   for (int i = 0; i < M; i++)
     if (channel_mask(i))
       mask.row(i).setOnes();
@@ -44,7 +44,7 @@ int main(void)
   t = GetRealTime() - t;
   cout << "[done]" << endl << endl;
 
-  size_t bytes = data.size()*sizeof(float);
+  size_t bytes = data.size()*sizeof(data(0));
   cout << "data: " << M << "x" << N << endl;
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
