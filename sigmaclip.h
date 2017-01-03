@@ -6,6 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
+
 template<typename I, typename P>
 auto StablePartitionPosition(I f, I l, P p) -> I
 {
@@ -20,6 +21,7 @@ auto StablePartitionPosition(I f, I l, P p) -> I
                 StablePartitionPosition(m, l, p));
 }
 
+
 float Median(Ref<VectorXf> data)
 {
   int n = data.rows();
@@ -28,7 +30,7 @@ float Median(Ref<VectorXf> data)
   nth_element(data.data(), data.data() + h, data.data() + n);
   float median = data(h);
 
-  // if n is even the median is the mean of (v[h]+v[h-1])/2
+  // if n is even the median is the mean of {v[h], v[h-1]}
   if (!(n&1))
   {
     median += *max_element(data.data(), data.data() + h);
@@ -38,10 +40,12 @@ float Median(Ref<VectorXf> data)
   return median;
 }
 
+
 float Sigma(Ref<VectorXf> data)
 {
   return sqrt((data.array() - data.mean()).square().sum() * (1.0f / data.rows()));
 }
+
 
 template<int MaxIter=100>
 int SigmaClip(Ref<VectorXf> data, Ref<VectorXf> mask, float n=2.0f)
@@ -55,13 +59,13 @@ int SigmaClip(Ref<VectorXf> data, Ref<VectorXf> mask, float n=2.0f)
       return int(*(mask.data() + (i - copy.data())));
     });
 
-    Map<VectorXf> remains(copy.data(), int(p-copy.data()));
+    Map<VectorXf, Aligned> remains(copy.data(), int(p-copy.data()));
 
     median = Median(remains);
     sigma = Sigma(remains);
     sum = mask.sum(); 
 
-    mask = (data.array() < median-n*sigma || data.array() > median+n*sigma).select(VectorXf::Zero(mask.rows(), mask.cols()), mask);
+    mask = (data.array() < median-n*sigma || data.array() > median+n*sigma).select(VectorXf::Zero(mask.rows()), mask);
 
     if (sum == mask.sum())
       return i;

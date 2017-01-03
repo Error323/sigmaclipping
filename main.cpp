@@ -14,91 +14,26 @@ int main(void)
 {
   cout << "Eigen v" << EIGEN_WORLD_VERSION << "." << EIGEN_MAJOR_VERSION << "." << EIGEN_MINOR_VERSION << endl;
 
-  /*
-  int a[] = {1, 4, 2, 6, 9, 5};
-  int b[] = {0, 1, 1, 0, 1, 0};
-
-  auto p = StablePartitionPosition(begin(a), end(a), [&](auto i) {
-    return *(begin(b) + (i - begin(a)));
-  });
-
-  for (auto f = begin(a), l = p; f != l; ++f) cout << *f << " ";
-  cout << "^ ";
-  for (auto f = p, l = end(a); f != l; ++f) cout << *f << " ";
-  cout << endl;
-  */
-
-  VectorXf data(7); data << 7,1,0,2,8,3,1;
-  VectorXf mask(7); mask << 1,1,1,1,1,1,1;
-
-  cout << data.transpose() << endl;
-  cout << SigmaClip(data, mask) << endl;
-  cout << mask.transpose() << endl;
-  cout << data.transpose() << endl;
-
-  /*
   static const int R = 288;
   static const int N = R*(R+1)/2;
   static const int M = 63;
-  static const int HALF_M = M/2;
-  static const float nsigma = 2.5f;
+  static const float nsigma = 2.0f;
 
-  MatrixXf data = MatrixXf::Random(M, N);
+  MatrixXcf data = MatrixXcf::Random(M, N);
   MatrixXf mask = MatrixXf::Zero(M, N);
-  MatrixXf result = MatrixXf::Zero(1, N);
-  VectorXf std = VectorXf::Zero(N);
-  VectorXf centroid = VectorXf::Zero(N);
-  VectorXf mean = VectorXf::Zero(N);
-  VectorXf minval = VectorXf::Zero(N);
-  VectorXf maxval = VectorXf::Zero(N);
+  MatrixXcf result = MatrixXcf::Zero(1, N);
 
   cout << "computing..." << flush;
   double t = GetRealTime();
+  MatrixXf abs = data.array().abs();
+  VectorXf channels = abs.rowwise().mean();
+  VectorXf channel_mask = VectorXf::Ones(M);
 
-  // computes the exact median
-  if (M&1)
-  {
-#pragma omp parallel for
-    for (int i = 0; i < N; i++)
-    {
-      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
-      nth_element(row.begin(), row.begin()+HALF_M, row.end());
-      centroid(i) = row[HALF_M];
-    }
-  }
-  // nth_element guarantees x_0,...,x_{n-1} < x_n
-  else
-  {
-#pragma omp parallel for
-    for (int i = 0; i < N; i++)
-    {
-      vector<float> row(data.data()+i*M, data.data()+(i+1)*M);
-      nth_element(row.begin(), row.begin()+HALF_M, row.end());
-      centroid(i) = row[HALF_M];
-      centroid(i) += *max_element(row.begin(), row.begin()+HALF_M);
-      centroid(i) *= 0.5f;
-    }
-  }
+  int iters = SigmaClip(channels, channel_mask, nsigma);
 
-  // compute the mean
-  mean = data.colwise().mean();
-
-  // compute std (x) = sqrt ( 1/N SUM_i (x(i) - mean(x))^2 )
-  std = (((data.rowwise() - mean.transpose()).array().square()).colwise().sum() *
-         (1.0f / M))
-            .array()
-            .sqrt();
-
-  // compute n sigmas from centroid
-  minval = centroid - std * nsigma;
-  maxval = centroid + std * nsigma;
-  
-  // compute clip mask
-  for (int i = 0; i < N; i++)
-  {
-    mask.col(i) = (data.col(i).array() > minval(i)).select(VectorXf::Ones(M), 0.0f);
-    mask.col(i) = (data.col(i).array() < maxval(i)).select(VectorXf::Ones(M), 0.0f);
-  }
+  for (int i = 0; i < M; i++)
+    if (channel_mask(i))
+      mask.row(i).setOnes();
 
   // apply clip mask to data
   data.array() *= mask.array();
@@ -114,7 +49,7 @@ int main(void)
   cout << "size: " << bytes*1e-6f << " MB" << endl;
   cout << "rate: " << bytes/(1e6f*t) << " MB/s" << endl;
   cout << "time: " << t << " s" << endl;
-  */
+  cout << "iter: " << iters << endl;
 
   return 0;
 }
